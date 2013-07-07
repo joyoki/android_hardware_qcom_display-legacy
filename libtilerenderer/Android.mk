@@ -6,6 +6,7 @@ ifeq ($(USE_OPENGL_RENDERER),true)
 LOCAL_MODULE           := libtilerenderer
 LOCAL_MODULE_TAGS      := optional
 LOCAL_CFLAGS           := -DLOG_TAG=\"qdtilerenderer\"
+LOCAL_CFLAGS           += -DGL_GLEXT_PROTOTYPES
 LOCAL_C_INCLUDES := \
         frameworks/base/include/utils \
         frameworks/base/libs/hwui \

@@ -51,7 +51,6 @@
 using gralloc::IMemAlloc;
 using gralloc::IonController;
 using gralloc::alloc_data;
-using android::sp;
 
 C2D_STATUS (*LINK_c2dCreateSurface)( uint32 *surface_id,
                                      uint32 surface_bits,
@@ -127,7 +126,7 @@ enum eC2DFlags {
     FLAGS_TEMP_SRC_DST         = 1<<2
 };
 
-static android::sp<gralloc::IAllocController> sAlloc = 0;
+static gralloc::IAllocController* sAlloc = 0;
 /******************************************************************************/
 
 /** State information for each device instance */
@@ -951,7 +950,7 @@ static int get_temp_buffer(const bufferInfo& info, alloc_data& data)
     int allocFlags = GRALLOC_USAGE_PRIVATE_SYSTEM_HEAP;
 
     if (sAlloc == 0) {
-        sAlloc = gralloc::IAllocController::getInstance(false);
+        sAlloc = gralloc::IAllocController::getInstance();
     }
 
     if (sAlloc == 0) {
@@ -959,7 +958,7 @@ static int get_temp_buffer(const bufferInfo& info, alloc_data& data)
         return COPYBIT_FAILURE;
     }
 
-    int err = sAlloc->allocate(data, allocFlags, 0);
+    int err = sAlloc->allocate(data, allocFlags);
     if (0 != err) {
         ALOGE("%s: allocate failed", __FUNCTION__);
         return COPYBIT_FAILURE;
@@ -973,7 +972,7 @@ static int get_temp_buffer(const bufferInfo& info, alloc_data& data)
 static void free_temp_buffer(alloc_data &data)
 {
     if (-1 != data.fd) {
-        sp<IMemAlloc> memalloc = sAlloc->getAllocator(data.allocType);
+        IMemAlloc* memalloc = sAlloc->getAllocator(data.allocType);
         memalloc->free_buffer(data.base, data.size, 0, data.fd);
     }
 }
@@ -1231,7 +1230,7 @@ static int stretch_copybit_internal(
         }
 
         // Flush the cache
-        sp<IMemAlloc> memalloc = sAlloc->getAllocator(src_hnd->flags);
+        IMemAlloc* memalloc = sAlloc->getAllocator(src_hnd->flags);
         if (memalloc->clean_buffer((void *)(src_hnd->base), src_hnd->size,
                                    src_hnd->offset, src_hnd->fd)) {
             ALOGE("%s: clean_buffer failed", __FUNCTION__);
@@ -1322,7 +1321,7 @@ static int stretch_copybit_internal(
             return status;
         }
         // Invalidate the cache.
-        sp<IMemAlloc> memalloc = sAlloc->getAllocator(dst_hnd->flags);
+        IMemAlloc* memalloc = sAlloc->getAllocator(dst_hnd->flags);
         memalloc->clean_buffer((void *)(dst_hnd->base), dst_hnd->size,
                                dst_hnd->offset, dst_hnd->fd);
     }

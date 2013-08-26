@@ -113,7 +113,6 @@ sp<IAllocController> IAllocController::getInstance(bool useMasterHeap)
 }
 
 
-#ifdef USE_ION
 //-------------- IonController-----------------------//
 IonController::IonController()
 {
@@ -212,11 +211,10 @@ sp<IMemAlloc> IonController::getAllocator(int flags)
 
     return memalloc;
 }
-#endif
 
 //-------------- PmemKernelController-----------------------//
 //XXX: Remove - we're not using pmem anymore
-#ifndef USE_ION
+#if 0
 PmemKernelController::PmemKernelController()
 {
     mPmemAdspAlloc = new PmemKernelAlloc(DEVICE_PMEM_ADSP);
